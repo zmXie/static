@@ -1,0 +1,7 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/eat", "destination": "/what-to-eat.html" },
+    { "source": "/word", "destination": "/word2html.html" }
+  ]
+}
