@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>开发者备忘录 - 静态工具集</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --bg-gradient: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --sidebar-width: 240px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            padding: 60px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .decoration-blob {
+            position: fixed;
+            z-index: -1;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            filter: blur(120px);
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .blob-1 {
+            top: -200px;
+            right: -200px;
+        }
+
+        .blob-2 {
+            bottom: -200px;
+            left: -200px;
+            opacity: 0.05;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            z-index: 1;
+            padding-bottom: 60px;
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
+            gap: 48px;
+            align-items: start;
+        }
+
+        header {
+            grid-column: 1 / -1;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 24px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 10px 16px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+        }
+
+        .back-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(-4px);
+        }
+
+        h1 {
+            font-size: 44px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.04em;
+        }
+
+        /* 侧边栏导航 */
+        .sidebar {
+            position: sticky;
+            top: 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item i {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: #fff;
+            background: rgba(99, 102, 241, 0.15);
+        }
+
+        .nav-item.active {
+            color: var(--primary-light);
+            border-left: 3px solid var(--primary-light);
+            border-radius: 4px 10px 10px 4px;
+        }
+
+        .memo-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
+        }
+
+        .content-section {
+            position: relative;
+            scroll-margin-top: 80px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .section-header h2 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.01em;
+        }
+
+        h2 i {
+            color: var(--primary-light);
+            background: rgba(99, 102, 241, 0.15);
+            padding: 12px;
+            border-radius: 16px;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 32px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .rejection-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .rejection-card {
+            border-left: 4px solid var(--primary);
+        }
+
+        .rejection-top {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .rejection-tag {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 10px;
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            flex-shrink: 0;
+        }
+
+        .rejection-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #f8fafc;
+            line-height: 1.4;
+        }
+
+        .memo-raw-text {
+            font-size: 15px;
+            color: #cbd5e1;
+            line-height: 1.8;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        .memo-p {
+            margin-bottom: 16px;
+            white-space: pre-line;
+        }
+
+        .memo-label {
+            color: var(--primary-light);
+            font-weight: 700;
+        }
+
+        .quote-box {
+            margin-top: 12px;
+            margin-bottom: 12px;
+            padding: 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 12px;
+            border: 1px dashed rgba(99, 102, 241, 0.3);
+            font-style: italic;
+            color: #a5b4fc;
+            font-size: 14px;
+            white-space: normal;
+        }
+
+        strong {
+            color: #fff;
+            font-weight: 700;
+        }
+
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--accent);
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: relative;
+                top: 0;
+                flex-direction: row;
+                overflow-x: auto;
+                padding: 12px;
+                margin-bottom: 24px;
+            }
+
+            .nav-item {
+                white-space: nowrap;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 40px 20px;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+
+            .card {
+                padding: 24px;
+            }
+
+            .rejection-top {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="decoration-blob blob-1"></div>
+    <div class="decoration-blob blob-2"></div>
+
+    <div class="container" id="top">
+        <header>
+            <a href="index.html" class="back-btn">
+                <i data-lucide="arrow-left" size="16"></i> 返回工具集
+            </a>
+            <h1>开发者备忘录</h1>
+        </header>
+
+        <!-- 目录侧边栏 -->
+        <aside class="sidebar">
+            <a href="#rejection" class="nav-item active"><i data-lucide="shield-alert"></i> 审核被拒</a>
+            <a href="#categories" class="nav-item"><i data-lucide="layout-grid"></i> 功能及类目</a>
+            <a href="#live" class="nav-item"><i data-lucide="video"></i> 小程序直播</a>
+            <a href="#subscribe" class="nav-item"><i data-lucide="bell"></i> 订阅消息</a>
+            <a href="#http-link" class="nav-item"><i data-lucide="share-2"></i> HTTP 链接</a>
+            <a href="#bind" class="nav-item"><i data-lucide="link"></i> 绑定规则</a>
+            <a href="#cloud" class="nav-item"><i data-lucide="cloud"></i> 数智云添加标准应用</a>
+        </aside>
+
+        <main class="memo-grid">
+            <!-- 审核被拒汇总 -->
+            <section class="content-section" id="rejection">
+                <div class="section-header">
+                    <i data-lucide="shield-alert"></i>
+                    <h2>小程序审核被拒</h2>
+                </div>
+
+                <div class="rejection-stack">
+                    <article class="card rejection-card">
+                        <div class="rejection-top">
+                            <span class="rejection-tag">被拒 1</span>
+                            <h3 class="rejection-title">登录报错提示：“登录失败，用户数据异常，用户id:xxxxxx”</h3>
+                        </div>
+                        <div class="memo-raw-text">
+                            <div class="memo-p"><strong class="memo-label">原因：</strong>
+                                一个用户不能绑定两个微信（也就是不能绑定两个openid）。比如在微信A上登录用户A（此时用户A已绑定微信A的openid），那就不能在微信B上登录用户A，这是我们小程序登录的通用逻辑，都会存在这个问题。
+                            </div>
+                            <div class="memo-p"><strong class="memo-label">解决方案：</strong>申诉，选择“我不接受”，内容如下：</div>
+                            <div class="quote-box">
+                                “你好，登录报错属于我们正常的业务需求，我们为了确保用户的唯一性，一个用户不能在两个微信上登录，否则抛出异常，而通常情况下不会出现这种问题。所以请审核员在对应微信上登录该账号，或者换一个账号登录。”
+                            </div>
+                            <div class="memo-p">
+                                【openid:一个微信用户对应一个公众平台应用(公众号/小程序)的唯一标识；unionid：一个微信用户对应一个开放平台账号的唯一标识(开放平台可以绑定同主体的小程序/公众号，每个应用的unionid相同，这样就可以打通应用数据)】
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="card rejection-card">
+                        <div class="rejection-top">
+                            <span class="rejection-tag">被拒 2</span>
+                            <h3 class="rejection-title">提示：“小程序账号登录功能暂未符合规范要求，请在用户了解体验小程序功能后，再要求用户进行账号登录”</h3>
+                        </div>
+                        <div class="memo-raw-text">
+                            <div class="memo-p"><strong class="memo-label">原因：</strong>需要登录才能进入小程序，导致体验受阻。</div>
+                            <div class="memo-p"><strong
+                                    class="memo-label">解决方案：</strong>做游客模式，把登录后置，必要的功能模块再弹框提示用户登录（弹框必须支持取消）。</div>
+                            <div class="quote-box">
+                                你好，我们小程序默认支持游客模式，在进入首页、健康测量、健康科普等页面都不需要登录，只会在业务必要时才提示用户登录，用户也可以自由选择是否登录，谢谢。</div>
+                        </div>
+                    </article>
+
+                    <article class="card rejection-card">
+                        <div class="rejection-top">
+                            <span class="rejection-tag">被拒 3</span>
+                            <h3 class="rejection-title">提示“你的小程序涉及提供用户随时随地自定义生成的内容…，请补充选择：社交-笔记类目。”</h3>
+                        </div>
+                        <div class="memo-raw-text">
+                            <div class="memo-p"><strong class="memo-label">原因：</strong>用户发布社区内容，需要添加社交笔记类目。</div>
+                            <div class="memo-p"><strong
+                                    class="memo-label">解决方案：</strong>添加社交-笔记类目，再提交审核，以后如果有其他小程序涉及到该功能，要提前添加该类目，避免卡审核时间。
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="card rejection-card">
+                        <div class="rejection-top">
+                            <span class="rejection-tag">被拒 4</span>
+                            <h3 class="rejection-title">提示“涉及平台未允许的内容：匿名社交。”</h3>
+                        </div>
+                        <div class="memo-raw-text">
+                            <div class="memo-p"><strong class="memo-label">原因：</strong>发布社区内容时，可以勾选是否匿名发布</div>
+                            <div class="memo-p"><strong
+                                    class="memo-label">解决方案：</strong>先去掉匿名发布选项，避一避风头再放出来，或者做一个审核配置，审核期间把相关功能关闭，审核过了再放出来。
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="card rejection-card">
+                        <div class="rejection-top">
+                            <span class="rejection-tag">被拒 5</span>
+                            <h3 class="rejection-title">提示：“你的小程序【评论】功能在进行内容安全验证时，存在信息安全风险，请尽快完善内容机制…”</h3>
+                        </div>
+                        <div class="memo-raw-text">
+                            <div class="memo-p"><strong class="memo-label">原因：</strong>未接入微信内容安全API，且发布之后直接展示出来了。</div>
+                            <div class="memo-p"><strong class="memo-label">解决方案：</strong>接入微信内容安全API，或者申诉，选择“我不接受”，内容如下：
+                            </div>
+                            <div class="quote-box">
+                                “我们有内容审核机制，用户发布的所有信息都会经过后台审核，确保没有违规信息才会真实发布，审核完成前，只有用户自己可以看到，安全审核完成前，只有用户自己可以看到，其他用户无法看到，请审核员发布内容后，再登录另一个账号检查。”
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="card rejection-card">
+                        <div class="rejection-top">
+                            <span class="rejection-tag">被拒 6</span>
+                            <h3 class="rejection-title">提示：“你好，你的小程序涉及提供播放、观看等服务，请补充选择：文娱-其他视频类目。”</h3>
+                        </div>
+                        <div class="memo-raw-text">
+                            <div class="memo-p"><strong
+                                    class="memo-label">原因：</strong>「文娱-其他视频」类目过期，重新申请需要视听许可证，该证书目前申请困难。</div>
+                            <div class="memo-p"><strong class="memo-label">解决方案：</strong>申诉，弱化视频功能，内容如下：</div>
+                            <div class="quote-box">
+                                “小程序主要功能是帮助患者做健康管理，其中有一个甲氨蝶呤操作视频播放，该视频仅用于介绍产品如何使用，为了支持患者管理健康，不属于文娱类功能，且不是主要内容，我们认为所选类目与服务内容一致，请审核员酌情考虑，谢谢。”
+                            </div>
+                            <div class="memo-p">（上传小程序页面图片，证明视频播放不是主要功能）</div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- 小程序类目 -->
+            <section class="content-section" id="categories">
+                <div class="section-header">
+                    <i data-lucide="layout-grid"></i>
+                    <h2>功能及类目</h2>
+                </div>
+                <div class="card">
+                    <div class="memo-raw-text">
+                        <div class="memo-p">1. 包含资讯相关功能，需要添加“资讯-信息资讯”类目</div>
+                        <div class="memo-p">
+                            2.包含video组件，需要添加“文娱-其他视频”类目（不强制绑定该类目，但是审核经常会被拒，可以申诉，例如被拒6），或者使用腾讯视频插件（需要将视频传到腾讯视频，有广告）
+                        </div>
+                        <div class="memo-p">3. 包含社区发帖评论功能，需要添加“社交-笔记”类目</div>
+                        <div class="memo-p">4. 包含地图导航功能，需要添加“交通服务-地图导航”类目</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 小程序直播 -->
+            <section class="content-section" id="live">
+                <div class="section-header">
+                    <i data-lucide="video"></i>
+                    <h2>小程序直播</h2>
+                </div>
+                <div class="card">
+                    <div class="memo-raw-text">
+                        <div class="memo-p">1. 使用小程序推流拉流组件：live-pusher，live-player；
+                            需要在开发管理中开通接口（必须有直播类目，申请类目需要相关资质）；使用自己的流媒体服务器。</div>
+                        <div class="memo-p">
+                            2.使用小程序直播插件：live-player-plugin；需要在小程序后台开通直播（部分类目可开通，且小程序近90天存在支付行为），使用腾讯云服务器。具体操作：在小程序后台创建直播间，微信扫码即可开播（打开直播插件），小程序端通过wx.navigateTo({url:
+                            `plugin-private://wx2b03c6e691cd7370/pages/live-player-plugin?room_id=${roomId}`})
+                            打开插件观看直播（room_id通过api获取小程序后台创建的直播间id）。</div>
+                        <div class="memo-p">3. 小程序内嵌视频号直播组件：channel-live； 小程序主体需要与视频号主体一致。</div>
+                        <div class="memo-p">4. 小程序跳转视频号，通过视频号id跳转到视频号直播，不要求主体一致。</div>
+                        <div class="memo-p">5. 如果只做拉流，可以用video组件，并设置is-live属性，基础库版本（2.28.1以上）。</div>
+                        <div class="memo-p">6. 如果只做拉流，也可以使用webview嵌入网页直播流，需要设置业务域名。</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 订阅消息 -->
+            <section class="content-section" id="subscribe">
+                <div class="section-header">
+                    <i data-lucide="bell"></i>
+                    <h2>小程序订阅消息</h2>
+                </div>
+                <div class="card">
+                    <div class="memo-raw-text">
+                        <div class="memo-p">订阅消息是给订阅者推送消息，谁订阅了就给谁发送消息，同时后端可以指定推送到体验版还是正式版。</div>
+                        <div class="memo-p">1. 在小程序后台创建订阅模版（分为一次性订阅：订阅一次可以发一次消息；和长期订阅：订阅一次可以无限发消息，特定类目才可以使用），会生成模版id。
+                        </div>
+                        <div class="memo-p">2. 前端小程序调用requestSubscribeMessage，传入模版id，申请订阅授权。</div>
+                        <div class="memo-p">3.
+                            后端调用微信接口发送订阅消息，传入模版id、openid（接受者）、page（页面跳转路径）、miniprogram_state（小程序版本，体验版还是正式版）</div>
+                        <div class="memo-p">4. 用户收到订阅消息后，点击跳转对应page。</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- HTTP 链接生成 -->
+            <section class="content-section" id="http-link">
+                <div class="section-header">
+                    <i data-lucide="share-2"></i>
+                    <h2>小程序生成 HTTP 链接</h2>
+                </div>
+                <div class="card">
+                    <div class="memo-raw-text">
+                        <div class="memo-p"><strong>接口调试工具：</strong> <a href="https://developers.weixin.qq.com/apiExplorer?utm_source=api_tools" target="_blank" style="color: var(--primary-light); text-decoration: none; border-bottom: 1px dashed var(--primary-light);">微信 API Explorer</a></div>
+                        <div class="memo-p"><strong>请求 payload 示例：</strong></div>
+                        <pre style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 16px; border: 1px solid var(--glass-border); color: var(--accent); font-family: 'Fira Code', monospace; font-size: 14px; line-height: 1.6; overflow-x: auto;">{
+    "path": "pages/index/index",
+    "query": "registerSource=ALJKXKQ&path=vitiligoDetail&id=1000000000000007",
+    "expire_type": 1,
+    "expire_interval": 30
+}</pre>
+                    </div>
+                </div>
+            </section>
+            <!-- 绑定规则 -->
+            <section class="content-section" id="bind">
+                <div class="section-header">
+                    <i data-lucide="link"></i>
+                    <h2>绑定与关联规则</h2>
+                </div>
+                <!-- 开放平台 -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <h3 style="margin-bottom: 20px; font-size: 18px; color: var(--primary-light);">小程序绑定开放平台</h3>
+                    <div class="memo-raw-text">
+                        <div class="memo-p">一个小程序只能绑定一个开放平台，一个开放平台最多能绑定50个同主体小程序、5个不同主体小程序（公众号同样如此）。
+                            同一个微信用户，在开放平台绑定的不同应用中，UnionID相同，OpenId不相同。</div>
+                    </div>
+                </div>
+                <!-- 公众号关联 -->
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; font-size: 18px; color: var(--primary-light);">公众号关联小程序</h3>
+                    <div class="memo-raw-text">
+                        <div class="memo-p">
+                            关联小程序之后，可以从公众号跳转小程序，也可以从小程序跳转公众号，也可以在小程序中通过webview打开公众号文章（3.4.8版本之后，可以通过wx.openOfficialAccountArticle
+                            打开任意公众号文章）。</div>
+                        <div class="memo-p">一个公众号可关联10个同主体，3个非同主体小程序。</div>
+                    </div>
+                </div>
+            </section>
+            <!-- 数智云解析 -->
+            <section class="content-section" id="cloud">
+                <div class="section-header">
+                    <i data-lucide="cloud"></i>
+                    <h2>数智云添加标准应用</h2>
+                </div>
+                <div class="card">
+                    <div class="memo-raw-text">
+                        <div class="memo-p">1. <strong>使用超级管理员账号</strong> : 在登录页面拼接参数：<code>superAdmin=888888</code>
+                        </div>
+                        <div class="memo-p">2. <strong>在玄关平台租户下</strong>，应用开发管理中，添加标准应用（标识：<code>xg_patient</code>，PC
+                            端地址：<code>/micro-patient/</code>，手机端地址：<code>https://HOSTNAME/mobile/xg-scp-patient-manage-m/?_t=V_TIMESTAMP#/?Authorization=USER_TOKEN&amp;hideToolbar=true</code>）
+                        </div>
+                        <div class="memo-p">3. 在玄关平台租户下，<strong>创建解决方案</strong></div>
+                        <div class="memo-p">4. 切换到玄关租户下，<strong>安装应用</strong></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            // 监听滚动，更新导航激活状态
+            const sections = document.querySelectorAll('.content-section');
+            const navItems = document.querySelectorAll('.nav-item');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (pageYOffset >= sectionTop - 150) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                    if (item.getAttribute('href').slice(1) === current) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
