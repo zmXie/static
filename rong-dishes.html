@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蓉姐私房菜</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .admin-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .admin-toggle:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .admin-panel {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .admin-panel.active {
+            display: block;
+        }
+
+        .admin-panel h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .dish-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .dish-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .dish-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+        }
+
+        .dish-info {
+            padding: 20px;
+        }
+
+        .dish-name {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .dish-category {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .dish-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .dish-price {
+            font-size: 1.8em;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .dish-actions {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .dish-actions button {
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .category-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 20px;
+            border: 2px solid white;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-toggle {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍽️ 蓉姐私房菜</h1>
+            <p>用心做好菜，味道自己会说话</p>
+        </header>
+
+        <button class="admin-toggle" onclick="toggleAdminPanel()">
+            🔧 管理员模式
+        </button>
+
+        <div class="admin-panel" id="adminPanel">
+            <h2 id="formTitle">新增菜品</h2>
+            <form id="dishForm" onsubmit="saveDish(event)">
+                <input type="hidden" id="dishId">
+                
+                <div class="form-group">
+                    <label>菜品名称 *</label>
+                    <input type="text" id="dishName" required placeholder="请输入菜品名称">
+                </div>
+
+                <div class="form-group">
+                    <label>菜品分类 *</label>
+                    <select id="dishCategory" required>
+                        <option value="">请选择分类</option>
+                        <option value="凉菜">凉菜</option>
+                        <option value="热菜">热菜</option>
+                        <option value="汤品">汤品</option>
+                        <option value="主食">主食</option>
+                        <option value="甜品">甜品</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>价格 (元) *</label>
+                    <input type="number" id="dishPrice" required step="0.01" min="0" placeholder="请输入价格">
+                </div>
+
+                <div class="form-group">
+                    <label>菜品描述</label>
+                    <textarea id="dishDescription" placeholder="请输入菜品描述"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>图标/表情</label>
+                    <input type="text" id="dishEmoji" placeholder="例如：🍜 🍛 🥗">
+                </div>
+
+                <div style="text-align: right;">
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存菜品</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="category-filter" id="categoryFilter">
+            <button class="filter-btn active" onclick="filterByCategory('all')">全部</button>
+            <button class="filter-btn" onclick="filterByCategory('凉菜')">凉菜</button>
+            <button class="filter-btn" onclick="filterByCategory('热菜')">热菜</button>
+            <button class="filter-btn" onclick="filterByCategory('汤品')">汤品</button>
+            <button class="filter-btn" onclick="filterByCategory('主食')">主食</button>
+            <button class="filter-btn" onclick="filterByCategory('甜品')">甜品</button>
+        </div>
+
+        <div id="menuGrid" class="menu-grid">
+            <!-- 菜品卡片将在这里动态生成 -->
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <h3>🍽️ 还没有菜品</h3>
+            <p>点击右上角"管理员模式"添加您的招牌菜吧！</p>
+        </div>
+    </div>
+
+    <script>
+        // 菜品数据
+        let dishes = JSON.parse(localStorage.getItem('rongjie_dishes')) || [
+            {
+                id: 1,
+                name: '宫保鸡丁',
+                category: '热菜',
+                price: 38,
+                description: '经典川菜，鸡肉鲜嫩，花生香脆，麻辣适中',
+                emoji: '🍗'
+            },
+            {
+                id: 2,
+                name: '麻婆豆腐',
+                category: '热菜',
+                price: 28,
+                description: '麻辣鲜香，豆腐嫩滑，下饭神器',
+                emoji: '🥘'
+            },
+            {
+                id: 3,
+                name: '夫妻肺片',
+                category: '凉菜',
+                price: 45,
+                description: '传统川味凉菜，麻辣可口，回味无穷',
+                emoji: '🥗'
+            },
+            {
+                id: 4,
+                name: '东坡肉',
+                category: '热菜',
+                price: 68,
+                description: '肥而不腻，入口即化，色香味俱全',
+                emoji: '🍖'
+            },
+            {
+                id: 5,
+                name: '酸辣汤',
+                category: '汤品',
+                price: 22,
+                description: '酸辣开胃，暖身暖心，早餐首选',
+                emoji: '🍲'
+            }
+        ];
+
+        let currentFilter = 'all';
+        let isAdminMode = false;
+
+        // 初始化
+        function init() {
+            renderMenu();
+        }
+
+        // 切换管理员模式
+        function toggleAdminPanel() {
+            isAdminMode = !isAdminMode;
+            const panel = document.getElementById('adminPanel');
+            const btn = document.querySelector('.admin-toggle');
+            
+            if (isAdminMode) {
+                panel.classList.add('active');
+                btn.textContent = '❌ 关闭管理员';
+                btn.style.background = 'rgba(220, 53, 69, 0.3)';
+            } else {
+                panel.classList.remove('active');
+                btn.textContent = '🔧 管理员模式';
+                btn.style.background = 'rgba(255,255,255,0.2)';
+            }
+        }
+
+        // 渲染菜单
+        function renderMenu() {
+            const grid = document.getElementById('menuGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            let filteredDishes = currentFilter === 'all' 
+                ? dishes 
+                : dishes.filter(d => d.category === currentFilter);
+
+            if (filteredDishes.length === 0) {
+                grid.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            grid.innerHTML = filteredDishes.map(dish => `
+                <div class="dish-card">
+                    <div class="dish-image">${dish.emoji || '🍽️'}</div>
+                    <div class="dish-info">
+                        <div class="dish-name">${dish.name}</div>
+                        <span class="dish-category">${dish.category}</span>
+                        <p class="dish-description">${dish.description || '暂无描述'}</p>
+                        <div class="dish-price">¥${parseFloat(dish.price).toFixed(2)}</div>
+                    </div>
+                    ${isAdminMode ? `
+                        <div class="dish-actions">
+                            <button class="btn btn-secondary" onclick="editDish(${dish.id})">编辑</button>
+                            <button class="btn btn-danger" onclick="deleteDish(${dish.id})">删除</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // 分类筛选
+        function filterByCategory(category) {
+            currentFilter = category;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent === (category === 'all' ? '全部' : category)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            renderMenu();
+        }
+
+        // 保存菜品
+        function saveDish(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('dishId').value;
+            const dish = {
+                id: id ? parseInt(id) : Date.now(),
+                name: document.getElementById('dishName').value,
+                category: document.getElementById('dishCategory').value,
+                price: parseFloat(document.getElementById('dishPrice').value),
+                description: document.getElementById('dishDescription').value,
+                emoji: document.getElementById('dishEmoji').value || '🍽️'
+            };
+
+            if (id) {
+                // 编辑模式
+                const index = dishes.findIndex(d => d.id === parseInt(id));
+                if (index !== -1) {
+                    dishes[index] = dish;
+                }
+            } else {
+                // 新增模式
+                dishes.push(dish);
+            }
+
+            localStorage.setItem('rongjie_dishes', JSON.stringify(dishes));
+            resetForm();
+            renderMenu();
+            
+            alert('菜品保存成功！');
+        }
+
+        // 编辑菜品
+        function editDish(id) {
+            const dish = dishes.find(d => d.id === id);
+            if (!dish) return;
+
+            document.getElementById('formTitle').textContent = '编辑菜品';
+            document.getElementById('dishId').value = dish.id;
+            document.getElementById('dishName').value = dish.name;
+            document.getElementById('dishCategory').value = dish.category;
+            document.getElementById('dishPrice').value = dish.price;
+            document.getElementById('dishDescription').value = dish.description || '';
+            document.getElementById('dishEmoji').value = dish.emoji;
+
+            document.getElementById('adminPanel').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 删除菜品
+        function deleteDish(id) {
+            if (confirm('确定要删除这道菜吗？')) {
+                dishes = dishes.filter(d => d.id !== id);
+                localStorage.setItem('rongjie_dishes', JSON.stringify(dishes));
+                renderMenu();
+                alert('菜品已删除！');
+            }
+        }
+
+        // 重置表单
+        function resetForm() {
+            document.getElementById('dishForm').reset();
+            document.getElementById('dishId').value = '';
+            document.getElementById('formTitle').textContent = '新增菜品';
+        }
+
+        // 启动
+        init();
+    </script>
+</body>
+</html>
